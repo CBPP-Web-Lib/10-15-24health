@@ -10,7 +10,7 @@ services:
             dockerfile: services/apache/Dockerfile
         ports:
             - "8080:80"
-        container_name: $PROJECTID-dev
+        container_name: health10-15-24-dev
     apache-prod:
         volumes:
             - ./node/prod:/var/www/html/js:rw
@@ -21,7 +21,7 @@ services:
             dockerfile: services/apache/Dockerfile
         ports:
             - "8081:80"
-        container_name: $PROJECTID-prod
+        container_name: health10-15-24-prod
     node-build:
         volumes:
             - ./node:/opt/project/app:rw
@@ -37,5 +37,5 @@ services:
         build:
             context: .
             dockerfile: services/watch/Dockerfile
-        container_name: $PROJECTID-watch
+        container_name: health10-15-24-watch
         user: ${UID}:${GID}

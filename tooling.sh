@@ -1,1 +1,1 @@
-docker exec -u $UID $PROJECTID-watch node $1
+docker exec -u $UID health10-15-24-watch node $1
