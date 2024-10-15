@@ -96,8 +96,9 @@ function adjustStrokeWidth(z) {
 }
 
 function create_svg(sel) {
-  var svg = d3_select(sel).append("svg")
-    .attr("viewBox", "0 0 960 500");
+  document.querySelector(sel).innerHTML = "<div class='svg-wrap'></div>";
+  var svg = d3_select(sel + " .svg-wrap").append("svg")
+    .attr("viewBox", "20 0 860 500");
   var zoomer = svgPanZoom(sel + " svg", {
     onZoom: adjustStrokeWidth,
     zoomScaleSensitivity: 0.4,
