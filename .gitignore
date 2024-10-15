@@ -2,6 +2,8 @@ node_modules
 node/shp
 node/zip
 node/geojson
+node/geo
+html/topojson
 package-lock.json
 html/vendor
 html/composer.lock

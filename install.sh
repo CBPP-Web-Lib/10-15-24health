@@ -8,4 +8,4 @@ if [[ $(uname) == "Darwin" ]]; then
 fi
 echo UID=${USER_ID} >> .env
 echo GID=${GROUP_ID} >> .env
-docker-compose run -u ${USER_ID} --workdir "/opt/project/app" --entrypoint  "npm install" node-watch
+docker-compose run -u ${USER_ID} --workdir "/opt/project/app" --entrypoint  "npm install topojson node-watch

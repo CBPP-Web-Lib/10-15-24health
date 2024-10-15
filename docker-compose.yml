@@ -33,6 +33,7 @@ services:
     node-watch:
         volumes:
             - ./node:/opt/project/app:rw
+            - ./html:/opt/project/html:rw
             - ./services/watch/webpack.config.js:/opt/project/webpack.config.js:rw
         build:
             context: .
