@@ -1,7 +1,7 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import "./style.scss";
-import { color, select as d3_select, xml } from "d3";
+import { select as d3_select } from "d3";
 import { geoAlbersUsa as d3_geoAlbersUsa } from "d3";
 import { geoPath as d3_geoPath } from "d3";
 import {feature} from "topojson"
@@ -12,96 +12,69 @@ import fips_raw from "./fips.csv";
 import Handlebars from "handlebars";
 import commaNumber from "comma-number";
 import popupSnippet from "./popup.snippet";
+import { loadTypekit } from "./load_typekit";
+import { parse_csv } from "./parse_csv";
 
+/**
+ * Initial setup tasks
+ */
 const id = "health10-15-24"
 const sel = "#" + id
 const script_id = "script_" + id
 const script_sel = "#" + script_id
-const url_base = document.querySelector(script_sel).src.replace(/js\/app(\.min)*\.js/g,"")
-var projection = d3_geoAlbersUsa();
-var pathGenerator = d3_geoPath(projection);
-var colors = cbpp_colorgen("#fcf8f2", "#ba0f26", 8, null, true);
-var fips = key_by_first(fips_raw)
 
+/*Gets the correct base URL regardless of whether we're on the test apps.cbpp.org page or the real cbpp.org page*/
+const url_base = document.querySelector(script_sel).src.replace(/js\/app(\.min)*\.js/g,"")
+const projection = d3_geoAlbersUsa();
+const pathGenerator = d3_geoPath(projection);
+const colors = cbpp_colorgen("#fcf8f2", "#ba0f26", 8, null, true);
+const fips = key_by_first(fips_raw)
 Handlebars.registerHelper("dollar", function(n) {
   return "$" + commaNumber(Math.round(n));
 })
-
 Handlebars.registerHelper("commaNumber", function(n) {
   return commaNumber(Math.round(n))
 })
-
 Handlebars.registerHelper("percent", function(n) {
   return Math.round(n*100) + "%";
 });
-
-function loadTypekit() {
-  return new Promise((resolve, reject) => {
-    var resolved = false;
-    function resolveOnce() {
-      if (!resolved) {resolve()}
-    }
-    var tpscript = document.createElement("script");
-    tpscript.setAttribute("src", "//use.typekit.net/bwe8bid.js");
-    tpscript.onload = function() {
-      Typekit.load({
-        active:resolveOnce()
-      });
-    }
-    document.body.appendChild(tpscript);
-    setTimeout(resolveOnce, 1000);
-  });
-}
-
 const popupMaker = Handlebars.compile(popupSnippet);
 
+/**
+ * Download the required files and wait for document ready
+ */
 Promise.all([
   new Promise((resolve) => {document.addEventListener("DOMContentLoaded", resolve)}),
   axios.get(url_base + "topojson/cd_topojson.json"),
   axios.get(url_base + "data.csv"),
   loadTypekit()
 ]).then((d) => {
+
+  /*Convert the downloaded topojson file to GeoJSON*/
   var geojson = feature(d[1].data, d[1].data.objects.districts);
+
+  /*Parse the data CSV*/
   var {data, headers} = parse_csv(d[2].data);
+
+  /*Merge it into the GeoJSON data*/
   merge_csv(geojson, data, headers);
+
+  /*Create the SVG and the zoom controller*/
   var {svg, zoomer} = create_svg(sel + " .map-wrap");
 
+  /*Create the zoom buttons*/
   create_controls(sel, zoomer);
+
+  /*Draw the map!*/
   var { bins } = draw_districts(svg, geojson, data);
+
+  /*Draw the legend*/
   var { legend } = create_legend(sel + " .map-wrap", bins);
 })
 
-function key_by_first(d) {
-  var r = {};
-  d.forEach((row) => {
-    if (row[0]!=="") {
-      r[row[0]] = row[1];
-    }
-  });
-  return r;
-}
-
-function parse_csv(d) {
-  const header_row = 1;
-  const data_start = 2;
-  d = d.split("\n");
-  var r = {};
-  d.forEach((row, i) => {
-    if (i < data_start) {return;}
-    row = row.split(",");
-    row.forEach((cell, j) => {
-      row[j] = cell*1;
-    })
-    var state = row[0]*1;
-    var cd = row[1]*1;
-    if (typeof(r[state])==="undefined") {
-      r[state] = {};
-    }
-    r[state][cd] = row;
-  });
-  return {data: r, headers: d[header_row].split(",")};
-}
-
+/**
+ * Merges CSV data row into GeoJSON feature property object
+ */
 function merge_properties(props, data, headers) {
   data.forEach((item, j) => {
     if (j >= 2) {
@@ -112,6 +85,9 @@ function merge_properties(props, data, headers) {
   props.full_district_name = props.state_name + " " + props.NAMELSAD;
 }
 
+/**
+ * Merges all CSV data into the GeoJSON object
+ */
 function merge_csv(geojson, data, headers) {
   geojson.features.forEach((feature) => {
     var state = feature.properties.STATEFP*1;
@@ -124,6 +100,9 @@ function merge_csv(geojson, data, headers) {
   });
 }
 
+/**
+ * Make the buttons and attach handlers
+ */
 function create_controls(sel, zoomer) {
   var buttons = document.createElement("div");
   buttons.classList.add("buttons");
@@ -146,12 +125,19 @@ function create_controls(sel, zoomer) {
 
 }
 
+/**
+ * Runs whenever map is zoomed in or out - we want the district border width
+ * to be independent of zoom level, so adjust accordingly
+ */
 function adjustStrokeWidth(z) {
   d3_select(sel).selectAll("svg path").each(function() {
     d3_select(this).attr("stroke-width", 0.2/z);
   });
 }
 
+/**
+ * Create SVG and zoomer controller
+ */
 function create_svg(sel) {
   document.querySelector(sel).innerHTML = "<div class='svg-wrap'></div>";
   var svg = d3_select(sel + " .svg-wrap").append("svg")
@@ -164,9 +150,14 @@ function create_svg(sel) {
     minZoom: 1,
     maxZoom: 50
   });
-  return {svg, zoomer};
+  return {svg, zoomer, popup_wrap};
 }
 
+/**
+ * Determine ideal bin thresholds for data property,
+ * assuming we want an equal number of districts
+ * in each bin
+ */
 function binData(cds, prop, bins) {
   var list = [];
   cds.forEach((feature) => {
@@ -184,6 +175,9 @@ function binData(cds, prop, bins) {
   return r;
 }
 
+/**
+ * Draw the map! Use standard d3 enter/merge/exit pattern
+ */
 function draw_districts(svg, geojson) {
   var districts = svg.select(".svg-pan-zoom_viewport").selectAll(".path.district")
     .data(geojson.features);
@@ -216,24 +210,37 @@ function draw_districts(svg, geojson) {
       }
     })
     .on("touchend", function(e, data) {
+      /*mobile/touch devices only. Attaching to touchend
+      seems to cause less conflicts with the pan/zoom library*/
+
+      /*Don't do anything for districts with no data*/
       if (!data.properties.cd_enroll) {return;}
+
       var popup_html = popupMaker(data.properties);
       set_popup_text(popup_html);
       show_popup();
       position_popup(e.changedTouches[0])
+
+      /*Remove any active hover classes*/
       document.querySelectorAll(sel + " .hover-active").forEach((el) => {
         el.classList.remove("hover-active");
       })
+
+      /*Add hover class to this path*/
       this.classList.add("hover-active");
       return true;
     })
     .on("mouseenter", function(e, data) {
+      /*Devices with a mouse only*/
       hide_popup()
+
+      /*Don't do anything for districts with no data*/
       if (!data.properties.cd_enroll) {return;}
       var popup_html = popupMaker(data.properties);
       set_popup_text(popup_html);
-      //window.requestAnimationFrame(show_popup);
       show_popup();
+
+      /*Add hover class to this path*/
       this.classList.add("hover-active");
 
     })
@@ -245,6 +252,10 @@ function draw_districts(svg, geojson) {
       this.classList.remove("hover-active");
     })
   document.body.addEventListener("touchend", function(e) {
+    /*Mobile/touch devices only. Attach this handler to the whole
+    document and determine if we've clicked outside a relevant target*/
+
+    /*Get list of target and all parents*/
     var parents = [];
     parents.push(e.target);
     var target = e.target;
@@ -254,6 +265,8 @@ function draw_districts(svg, geojson) {
     }
     var in_path = false;
     var in_popup = false;
+
+    /*If list has a district path or a popup, note that*/
     parents.forEach((el) => {
       if (el.tagName === "path") {
         if (el.classList.contains("district")) {
@@ -266,13 +279,15 @@ function draw_districts(svg, geojson) {
         }
       }
     });
+
+    /*If we're not in a district path or a popup, the user
+    has touched outside and we can hide any active popup*/
     if (!in_path && !in_popup) {
       hide_popup();
       document.querySelectorAll(sel + " .hover-active").forEach((el) => {
         el.classList.remove("hover-active");
       })
     }
-    console.log(parents);
   });
   return { bins }
 }
@@ -289,6 +304,9 @@ function show_popup() {
   document.querySelector(sel + " .popup-wrap").classList.add("visible");
 }
 
+/**
+ * Position popup; it uses fixed positioning so use clientX, clientY
+ */
 function position_popup(e) {
   var {clientX, clientY} = e;
   var popup = document.querySelector(sel + " .popup-wrap");
@@ -300,6 +318,9 @@ function position_popup(e) {
   }
 }
 
+/**
+ * Create legend
+ */
 function create_legend(el, bins) {
   var legend = document.createElement("div");
   legend.classList.add("legend");
@@ -312,6 +333,9 @@ function create_legend(el, bins) {
   return { legend }
 }
 
+/**
+ * Use SVG rects (CSS background-color doesn't print) 
+ */
 function create_bin(bin, color) {
   var box = document.createElement("div");
   box.classList.add("box");
@@ -333,6 +357,7 @@ function create_bin(bin, color) {
     
 }
 
+/*Last label at the end; more labels than boxes*/
 function create_final_label(n) {
   var box = document.createElement("div");
   box.classList.add("fake-box");
@@ -341,4 +366,14 @@ function create_final_label(n) {
   label.innerHTML = "<div>$" + n + "</div>";
   box.appendChild(label);
   return box;
+}
+
+function key_by_first(d) {
+  var r = {};
+  d.forEach((row) => {
+    if (row[0]!=="") {
+      r[row[0]] = row[1];
+    }
+  });
+  return r;
 }
