@@ -18,6 +18,22 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.(snippet)$/i,
+        use: [
+          {
+            loader: 'raw-loader'
+          }
+        ]
+      },
+      {
+        test: /\.(csv)$/i,
+        use: [
+          {
+            loader: 'csv-loader'
+          }
+        ]
+      },
+      {
         test: /\.(png|jpg|gif)$/i,
         use: [
           {

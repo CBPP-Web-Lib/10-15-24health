@@ -1,18 +1,146 @@
 #health10-15-24 {
   max-width:940px;
+  font-family:"proxima-nova";
+  border-top:1px solid #666;
+  border-bottom:1px solid #666;
+  position:relative;
+  .legend {
+    margin-top:1em;
+    margin-left:10%;
+    margin-right:10%;
+    font-size:12pt;
+    @media (max-width:768px) {
+      font-size:10pt;
+    }
+    white-space:nowrap;
+    & > .box, & .fake-box {
+      width:12.5%;
+      height:30px;
+      margin-bottom:30px;
+      display:inline-block;
+      position:relative;
+      border-left:1px solid #000;
+      svg {
+        width:100%;
+        height:20px;
+      }
+      .label {
+        position:absolute;
+        text-align:center;
+        left:0;
+        bottom:-30px;
+        & > div {
+          position:relative;
+          left:-50%;
+        }
+      }
+    }
+    & > .fake-box {
+      width:0;
+    }
+  }
+  .credit {
+    position:absolute;
+    right:0px;
+    top:100%;
+    margin-top:0.5em;
+    text-align:right;
+    text-transform: uppercase;
+    color:#666;
+    font-size:12pt;
+    line-height:1;
+  }
+  h2 {
+    font-family:inherit;
+    font-size:18pt;
+    line-height:1.2;
+  }
+  h3 {
+    font-family:"proxima-nova-condensed",sans-serif;
+    font-weight:400;
+    font-size:15pt;
+    line-height:1.2;
+  }
+  .notes {
+    font-size:11pt;
+    line-height:1.2;
+    margin-top:1em;
+    color:#333;
+  }
   .svg-wrap {
     width:100%;
     height:0;
     padding-bottom:58.14%;
     position: relative;
-    border:1px solid #ccc;
+    position: relative;
   } 
   svg {
     width:100%;
     height: 100%;
     position: absolute;
+    path {
+      transition: fill 0.2s;
+      &.has-data {cursor:pointer;}
+    }
+    path.hover-active {
+      fill:#db9b3c;
+    }
   }
-  button {
-    position: relative;
+
+  .buttons {
+    position: absolute;
+    width:2px;
+    top:0;
+    button {
+      white-space: nowrap;
+      width:80px;
+      margin:0.5em 0.2em;
+      font-weight:bold;
+      font-family:inherit;
+    }
   }
+
+  .popup-wrap {
+    position:fixed;
+    opacity:0;
+    transition:opacity 0.2s;
+    z-index:100;
+    pointer-events:none;
+    &.visible {
+      opacity:1;
+      pointer-events:all;
+    } 
+    .popup {
+      width:200px;
+      background-color: #fff;
+      z-index:10;
+      position:relative;
+      padding:10px;
+      border:1px solid #aaa;
+      h3 {
+        font-size:14pt;
+        line-height:1.2;
+        margin-top:0;
+        font-weight:bold;
+        border-bottom:2px solid #000;
+      }
+      table {
+        width:100%;
+        font-size:12pt;
+        font-family:"proxima-nova","Roboto",sans-serif;
+        td {
+          padding:0;
+          line-height:1.2;
+          font-family:"proxima-nova-condensed","Roboto Condensed",sans-serif;
+        }
+        td:first-child {
+          font-weight:bold;
+        }
+        td:last-child {
+          text-align:right;
+        }
+      }
+    }
+  }
+
 }
