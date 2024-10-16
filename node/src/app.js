@@ -1,7 +1,7 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import "./style.scss";
-import { select as d3_select } from "d3";
+import { select as d3_select, svg } from "d3";
 import { geoAlbersUsa as d3_geoAlbersUsa } from "d3";
 import { geoPath as d3_geoPath } from "d3";
 import {feature} from "topojson"
@@ -46,15 +46,17 @@ const popupMaker = Handlebars.compile(popupSnippet);
 Promise.all([
   new Promise((resolve) => {document.addEventListener("DOMContentLoaded", resolve)}),
   axios.get(url_base + "topojson/cd_topojson.json"),
+  axios.get(url_base + "topojson/state_topojson.json"),
   axios.get(url_base + "data.csv"),
   loadTypekit()
 ]).then((d) => {
 
-  /*Convert the downloaded topojson file to GeoJSON*/
+  /*Convert the downloaded topojson files to GeoJSON*/
   var geojson = feature(d[1].data, d[1].data.objects.districts);
+  var state_geojson = feature(d[2].data, d[2].data.objects.districts);
 
   /*Parse the data CSV*/
-  var {data, headers} = parse_csv(d[2].data);
+  var {data, headers} = parse_csv(d[3].data);
 
   /*Merge it into the GeoJSON data*/
   merge_csv(geojson, data, headers);
@@ -67,6 +69,9 @@ Promise.all([
 
   /*Draw the map!*/
   var { bins } = draw_districts(svg, geojson, data);
+
+  /*Overlay states*/
+  draw_states(svg, state_geojson);
 
   /*Draw the legend*/
   var { legend } = create_legend(sel + " .map-wrap", bins);
@@ -130,8 +135,11 @@ function create_controls(sel, zoomer) {
  * to be independent of zoom level, so adjust accordingly
  */
 function adjustStrokeWidth(z) {
-  d3_select(sel).selectAll("svg path").each(function() {
+  d3_select(sel).selectAll("svg path.district").each(function() {
     d3_select(this).attr("stroke-width", 0.2/z);
+  });
+  d3_select(sel).selectAll("svg path.state").each(function() {
+    d3_select(this).attr("stroke-width", 0.6/z);
   });
 }
 
@@ -176,17 +184,33 @@ function binData(cds, prop, bins) {
 }
 
 /**
+ * Draw states (purely decorative)
+ */
+function draw_states(svg, geojson) {
+  var states = svg.select(".svg-pan-zoom_viewport").selectAll("path.state")
+    .data(geojson.features);
+  states
+    .enter()
+    .append("path")
+    .attr("fill", "none")
+    .attr("stroke", "#000")
+    .attr("stroke-width", 0.6)
+    .attr("class","state")
+    .merge(states)
+    .attr("d", pathGenerator)
+}
+
+/**
  * Draw the map! Use standard d3 enter/merge/exit pattern
  */
 function draw_districts(svg, geojson) {
-  var districts = svg.select(".svg-pan-zoom_viewport").selectAll(".path.district")
+  var districts = svg.select(".svg-pan-zoom_viewport").selectAll("path.district")
     .data(geojson.features);
   var bins = binData(geojson.features, "cd_avg_savings", 8);
   districts
     .enter()
     .append("path")
-    .attr("fill", "none")
-    .attr("stroke", "#000")
+    .attr("stroke", "#fff")
     .attr("stroke-width", 0.2)
     .attr("class","district")
     .merge(districts)
