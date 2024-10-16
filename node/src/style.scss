@@ -14,7 +14,7 @@
     }
     white-space:nowrap;
     & > .box, & .fake-box {
-      width:12.5%;
+      width:var(--bin-width);
       height:30px;
       margin-bottom:30px;
       display:inline-block;
@@ -93,7 +93,7 @@
       &.has-data {cursor:pointer;}
     }
     path.hover-active {
-      fill:#9ab0db;
+      fill:var(--district-hover-color)
     }
   }
 
