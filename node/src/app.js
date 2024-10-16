@@ -82,10 +82,12 @@ function key_by_first(d) {
 }
 
 function parse_csv(d) {
+  const header_row = 1;
+  const data_start = 2;
   d = d.split("\n");
   var r = {};
   d.forEach((row, i) => {
-    if (i === 0) {return;}
+    if (i < data_start) {return;}
     row = row.split(",");
     row.forEach((cell, j) => {
       row[j] = cell*1;
@@ -97,7 +99,7 @@ function parse_csv(d) {
     }
     r[state][cd] = row;
   });
-  return {data: r, headers: d[0].split(",")};
+  return {data: r, headers: d[header_row].split(",")};
 }
 
 function merge_properties(props, data, headers) {

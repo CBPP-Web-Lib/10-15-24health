@@ -39,12 +39,19 @@
       width:0;
     }
   }
-  .credit {
+  .credit, .src-links {
     position:absolute;
-    right:0px;
     top:100%;
+  }
+  .src-links {
+    text-align:left;
+    left:0px;
+    font-size:10pt;
+  }
+  .credit {
     margin-top:0.5em;
     text-align:right;
+    right:0px;
     text-transform: uppercase;
     color:#666;
     font-size:12pt;
