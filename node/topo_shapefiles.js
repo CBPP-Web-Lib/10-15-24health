@@ -1,6 +1,12 @@
 const topojson = require("topojson")
 const fs = require("fs")
 
+try {
+  fs.mkdirSync("../html/topojson/");
+} catch (ex) {
+  console.log(ex);
+}
+
 handle_geojson_file("./geojson/cb_2023_us_cd118_500k.json", "../html/topojson/cd_topojson.json");
 handle_geojson_file("./geojson/cb_2023_us_state_500k.json", "../html/topojson/state_topojson.json");
 
@@ -36,4 +42,6 @@ function handle_geojson_file(file, dest) {
   merged_topo = topojson.quantize(merged_topo, 1e06);
   
   fs.writeFileSync(dest, JSON.stringify(merged_topo), "utf-8");
+
+  console.log("Successfully created " + dest);
 }
