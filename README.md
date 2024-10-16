@@ -8,7 +8,7 @@ After cloning this template repo:
 3. Run `./setup.sh` to download shapefiles and convert to topojson
 
 (Whenever working on project)
-4. Run `./start.sh` and visit `http://localhost:8080` (dev bundle; builds fast) or `http://localhost:8081` (prod bundle, builds slower, this is the one that gets deployed)
-5. In a separate terminal, run `./stop.sh` when done (or just ctrl-x in the running terminal)
+1. Run `./start.sh` and visit `http://localhost:8080` (dev bundle; builds fast) or `http://localhost:8081` (prod bundle, builds slower, this is the one that gets deployed)
+2. In a separate terminal, run `./stop.sh` when done (or just ctrl-x in the running terminal)
 
 To enter the Node container (for example, to run `npm i` this or that) just run `./enter_container.sh` to be dropped into a shell inside; and then just `exit` when done.
