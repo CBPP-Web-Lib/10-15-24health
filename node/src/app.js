@@ -20,7 +20,7 @@ const script_sel = "#" + script_id
 const url_base = document.querySelector(script_sel).src.replace(/js\/app(\.min)*\.js/g,"")
 var projection = d3_geoAlbersUsa();
 var pathGenerator = d3_geoPath(projection);
-var colors = cbpp_colorgen("#f5f7f0", "#336348", 8);
+var colors = cbpp_colorgen("#fcf8f2", "#ba0f26", 8, null, true);
 var fips = key_by_first(fips_raw)
 
 Handlebars.registerHelper("dollar", function(n) {
