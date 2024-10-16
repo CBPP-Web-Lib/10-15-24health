@@ -3,6 +3,7 @@ function loadTypekit() {
     var resolved = false;
     function resolveOnce() {
       if (!resolved) {resolve()}
+      resolved = true;
     }
     var tpscript = document.createElement("script");
     tpscript.setAttribute("src", "//use.typekit.net/bwe8bid.js");
