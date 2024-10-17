@@ -128,15 +128,16 @@ function create_controls(sel, zoomer) {
 }
 
 /**
- * Runs whenever map is zoomed in or out - we want the district border width
- * to be independent of zoom level, so adjust accordingly
+ * Runs whenever map is zoomed in or out - we don't want the borders
+ * to be huge when zoomed in, so adjust based on zoom level
  */
 function adjustStrokeWidth(z) {
+  var az = Math.sqrt(z)
   d3_select(sel).selectAll("svg path.district").each(function() {
-    d3_select(this).attr("stroke-width", DISTRICT_BORDER_WIDTH/z);
+    d3_select(this).attr("stroke-width", DISTRICT_BORDER_WIDTH/az);
   });
   d3_select(sel).selectAll("svg path.state").each(function() {
-    d3_select(this).attr("stroke-width", STATE_BORDER_WIDTH/z);
+    d3_select(this).attr("stroke-width", STATE_BORDER_WIDTH/az);
   });
 }
 
