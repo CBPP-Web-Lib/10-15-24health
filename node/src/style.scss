@@ -4,6 +4,8 @@
   border-top:1px solid #666;
   border-bottom:1px solid #666;
   position:relative;
+  margin-bottom:50px;
+  h2, h3 {max-width:none}
   .legend {
     margin-top:1em;
     margin-left:10%;
@@ -48,6 +50,14 @@
     left:0px;
     font-size:10pt;
     max-width:25%;
+    line-height:1;
+    margin-top:0.5em;
+    a {
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
   .credit {
     margin-top:0.5em;
@@ -103,12 +113,19 @@
     position: absolute;
     width:2px;
     top:0;
+    font-size:10pt;
     button {
       white-space: nowrap;
       width:80px;
       margin:0.5em 0.2em;
+      border:1px solid #666;
+      cursor:pointer;
       font-weight:bold;
       font-family:inherit;
+      background-color: #f0f0f0;
+      &:hover {
+        background-color: #ccc;
+      }
     }
   }
 
@@ -139,11 +156,17 @@
       table {
         width:100%;
         font-size:12pt;
+        padding:0;
+        border:0;
         font-family:"proxima-nova","Roboto",sans-serif;
+        tbody, tr, td {
+          font-size:inherit;
+        }
         td {
           padding:0;
           line-height:1.2;
           font-family:"proxima-nova-condensed","Roboto Condensed",sans-serif;
+          border:none;
         }
         td:first-child {
           font-weight:bold;
