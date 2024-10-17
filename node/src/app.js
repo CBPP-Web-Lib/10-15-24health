@@ -6,7 +6,7 @@ import {
   geoAlbersUsa as d3_geoAlbersUsa,
   geoPath as d3_geoPath 
 } from "d3";
-import {feature} from "topojson"
+import {feature, merge} from "topojson"
 import axios from "axios"
 import svgPanZoom from "svg-pan-zoom";
 import cbpp_colorgen from "cbpp_colorgen";
@@ -66,17 +66,18 @@ const popupMaker = Handlebars.compile(popupSnippet);
 Promise.all([
   new Promise((resolve) => {document.addEventListener("DOMContentLoaded", resolve)}),
   axios.get(url_base + "topojson/cd_topojson.json"),
-  axios.get(url_base + "topojson/state_topojson.json"),
   axios.get(url_base + "data.csv"),
   loadTypekit()
 ]).then((d) => {
 
   /*Convert the downloaded topojson files to GeoJSON*/
   var geojson = feature(d[1].data, d[1].data.objects.districts);
-  var state_geojson = feature(d[2].data, d[2].data.objects.districts);
+
+  /*Merge districts together into states to draw state borders*/
+  var state_geojson = merge_states_from_districts(d[1].data);
 
   /*Parse the data CSV*/
-  var {data, headers} = parse_csv(d[3].data);
+  var {data, headers} = parse_csv(d[2].data);
 
   /*Merge it into the GeoJSON data*/
   merge_csv(geojson, data, headers);
@@ -222,4 +223,31 @@ function draw_districts(args) {
     .on("mouseleave", mouseLeaveHandler)
   document.body.addEventListener("touchend", windowTouchEndHandler);
   return { bins }
+}
+
+/**
+ * Group districts by state and 
+ * merge into state objects to draw
+ * state borders
+ */
+function merge_states_from_districts(topo) {
+  var state_objs = {};
+  var r = {
+    "type": "FeatureCollection",
+    "features": []
+  }
+  topo.objects.districts.geometries.forEach((district) => {
+    var state = district.properties.STATEFP;
+    if (typeof(state_objs[state]) === "undefined") {
+      state_objs[state] = [];
+    }
+    state_objs[state].push(district);
+  })
+  Object.keys(state_objs).forEach((state_fips) => {
+    var state_districts = state_objs[state_fips];
+    var state_geo = merge(topo, state_districts);
+    state_geo.properties = {"STATEFP": state_fips};
+    r.features.push(state_geo);
+  })
+  return r;
 }
