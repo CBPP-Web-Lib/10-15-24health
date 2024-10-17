@@ -43,9 +43,11 @@ function event_handlers(args) {
       return popupRecentlyTouched
     },
     "onMouseDown" : function() {
+      document.querySelector(sel).classList.add("mousedown");
       mouseDown = true;
     },
     "onMouseUp" : function() {
+      document.querySelector(sel).classList.remove("mousedown");
       mouseDown = false;
     },
     "touchEndHandler" : function(e, data) {
