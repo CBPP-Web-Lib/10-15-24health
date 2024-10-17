@@ -99,6 +99,10 @@ Promise.all([
 
   /*Draw the legend*/
   create_legend(sel + " .map-wrap", bins, BIN_COLORS);
+
+  /*Show the whole thing*/
+  document.querySelector(sel).classList.add("loaded")
+  document.querySelector(sel).style.visibility = "visible";
 })
 
 
