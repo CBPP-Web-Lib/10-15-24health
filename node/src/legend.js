@@ -18,6 +18,10 @@ function create_legend(el, bins, colors) {
   return { legend }
 }
 
+function percent(n) {
+  return Math.round(n*100) + "%"
+}
+
 /**
  * Use SVG rects to draw legend (CSS background-color doesn't print) 
  */
@@ -36,7 +40,7 @@ function create_bin(bin, color) {
       .attr("stroke-width", 0)
   var label = document.createElement("div");
   label.classList.add("label");
-  label.innerHTML = "<div>$" + bin + "</div>";
+  label.innerHTML = "<div>" + percent(bin) + "</div>";
   box.appendChild(label);
   return box;
     
@@ -48,7 +52,7 @@ function create_final_label(n) {
   box.classList.add("fake-box");
   var label = document.createElement("div");
   label.classList.add("label");
-  label.innerHTML = "<div>$" + n + "</div>";
+  label.innerHTML = "<div>" + percent(n) + "</div>";
   box.appendChild(label);
   return box;
 }

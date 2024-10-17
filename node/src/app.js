@@ -38,6 +38,7 @@ const NUM_BINS = 8
 const STATE_BORDER_COLOR = "#000000"
 const DISTRICT_BORDER_COLOR = "#FFFFFF"
 const HOVER_COLOR = "#9ab0db"
+const PRIMARY_COL = "cd_perc_increase"
 
 /*This is a utility library that interpolates colors and returns a list*/
 const BIN_COLORS = cbpp_colorgen(LOW_COLOR, HIGH_COLOR, NUM_BINS, null, true);
@@ -59,6 +60,9 @@ Handlebars.registerHelper("commaNumber", function(n) {
 Handlebars.registerHelper("percent", function(n) {
   return Math.round(n*100) + "%";
 });
+Handlebars.registerHelper("annualize", function(n) {
+  return n*12
+})
 const popupMaker = Handlebars.compile(popupSnippet);
 
 /**
@@ -90,7 +94,7 @@ Promise.all([
   create_controls(sel, zoomer);
 
   /*Calculate the ideal bins*/
-  var bins = binData(geojson.features, "cd_avg_savings", NUM_BINS);
+  var bins = binData(geojson.features, PRIMARY_COL, NUM_BINS);
 
   /*Draw the map!*/
   draw_districts({svg, geojson, data, bins});
@@ -221,10 +225,10 @@ function draw_districts(args) {
     .attr("stroke", DISTRICT_BORDER_COLOR)
     .attr("stroke-width", DISTRICT_BORDER_WIDTH)
     .attr("fill", (d) => {
-      if (d.properties.cd_avg_savings) {
+      if (d.properties[PRIMARY_COL]) {
         var this_color;
         BIN_COLORS.forEach((color, j) => {
-          if (d.properties.cd_avg_savings >= bins[j]) {
+          if (d.properties[PRIMARY_COL] >= bins[j]) {
             this_color = color;
           }
         })
@@ -234,7 +238,7 @@ function draw_districts(args) {
       }
     })
     .each(function(d) {
-      if (d.properties.cd_avg_savings) {
+      if (d.properties[PRIMARY_COL]) {
         this.classList.add("has-data");
       }
     })
