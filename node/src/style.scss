@@ -30,7 +30,7 @@
         position:absolute;
         text-align:center;
         left:0;
-        bottom:-30px;
+        bottom:-25px;
         & > div {
           position:relative;
           left:-50%;
@@ -170,6 +170,8 @@
         }
         td:first-child {
           font-weight:bold;
+          text-indent:-10px;
+          padding-left:10px;
         }
         td:last-child {
           text-align:right;

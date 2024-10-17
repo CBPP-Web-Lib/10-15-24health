@@ -32,7 +32,7 @@ const url_base = document.querySelector(script_sel).src.replace(/js\/app(\.min)*
 /*Colors, widths, etc.*/
 const DISTRICT_BORDER_WIDTH = 0.2
 const STATE_BORDER_WIDTH = 0.6
-const LOW_COLOR = "#fcf8f2"
+const LOW_COLOR = "#f8dad1"
 const HIGH_COLOR = "#ba0f26"
 const NUM_BINS = 8
 const STATE_BORDER_COLOR = "#000000"
