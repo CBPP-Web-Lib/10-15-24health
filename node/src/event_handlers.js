@@ -1,3 +1,5 @@
+import { sassFalse } from "sass";
+
 function event_handlers(args) {
 
   var { sel, popupMaker } = args;
@@ -19,22 +21,44 @@ function event_handlers(args) {
    */
   function position_popup(e) {
     var {clientX, clientY} = e;
-    var popup = document.querySelector(sel + " .popup-wrap");
-    popup.style.top = (clientY + 20) + "px"
-    popup.style.left = clientX + "px";
     var px = clientX / window.innerWidth;
+    var py = clientY / window.innerHeight;
+    var popup = document.querySelector(sel + " .popup-wrap");
+    if (py < 0.5) {
+      popup.style.top = (clientY + 20) + "px"
+      popup.style.bottom = "";
+    } else {
+      popup.style.top = "";
+      popup.style.bottom = ((window.innerHeight - clientY) + 20) + "px";
+    }
+    popup.style.left = clientX + "px";
     if (popup.querySelector(".popup")) {
       popup.querySelector(".popup").style.left = (-px*200) + "px";
     }
   }
 
+  var popupRecentlyTouched = false
+  var mouseDown = false
+
   return {
+    "wasPopupTouched": function() {
+      return popupRecentlyTouched
+    },
+    "onMouseDown" : function() {
+      mouseDown = true;
+    },
+    "onMouseUp" : function() {
+      mouseDown = false;
+    },
     "touchEndHandler" : function(e, data) {
       /*mobile/touch devices only. Attaching to touchend
       seems to cause less conflicts with the pan/zoom library*/
 
       /*Don't do anything for districts with no data*/
       if (!data.properties.cd_enroll) {return;}
+
+      /*Avoid showing new popup if touched to close*/
+      if (popupRecentlyTouched) {return;}
 
       var popup_html = popupMaker(data.properties);
       set_popup_text(popup_html);
@@ -51,6 +75,9 @@ function event_handlers(args) {
       return true;
     },
     "mouseEnterHandler": function(e, data) {
+      if (popupRecentlyTouched) {return;}
+      if (mouseDown) {return;}
+
       /*Devices with a mouse only*/
       hide_popup()
 
@@ -65,6 +92,7 @@ function event_handlers(args) {
 
     },
     "mouseMoveHandler": (e, data) => {
+      if (popupRecentlyTouched) {return;}
       position_popup(e)
     },
     "mouseLeaveHandler": function(e, data) {
@@ -88,21 +116,30 @@ function event_handlers(args) {
   
       /*If list has a district path or a popup, note that*/
       parents.forEach((el) => {
-        if (el.tagName === "path") {
-          if (el.classList.contains("district")) {
-            in_path = true;
+        if (el.tagName) {
+          if (el.tagName.toLowerCase() === "path") {
+            if (el.classList.contains("district")) {
+              in_path = true;
+            }
           }
-        }
-        if (el.tagName === "div") {
-          if (el.classList.contains("popup")) {
-            in_popup = true;
+          if (el.tagName.toLowerCase() === "div") {
+            if (el.classList.contains("popup")) {
+              in_popup = true;
+            }
           }
         }
       });
+
+      if (in_popup) {
+        popupRecentlyTouched = true
+        setTimeout(() => {
+          popupRecentlyTouched = false
+        }, 100);
+      }
   
       /*If we're not in a district path or a popup, the user
       has touched outside and we can hide any active popup*/
-      if (!in_path && !in_popup) {
+      if (!in_path) {
         hide_popup();
         document.querySelectorAll(sel + " .hover-active").forEach((el) => {
           el.classList.remove("hover-active");

@@ -196,7 +196,9 @@ function draw_districts(args) {
     mouseLeaveHandler, 
     mouseMoveHandler, 
     touchEndHandler, 
-    windowTouchEndHandler 
+    windowTouchEndHandler,
+    onMouseDown,
+    onMouseUp
   } = event_handlers({sel, popupMaker});
   districts
     .enter()
@@ -229,6 +231,8 @@ function draw_districts(args) {
     .on("mousemove", mouseMoveHandler)
     .on("mouseleave", mouseLeaveHandler)
   document.body.addEventListener("touchend", windowTouchEndHandler);
+  document.body.addEventListener("mousedown", onMouseDown)
+  document.body.addEventListener("mouseup", onMouseUp) 
   return { bins }
 }
 
