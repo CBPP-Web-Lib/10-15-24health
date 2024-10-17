@@ -1,5 +1,3 @@
-import { sassFalse } from "sass";
-
 function event_handlers(args) {
 
   var { sel, popupMaker } = args;

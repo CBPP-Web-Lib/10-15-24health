@@ -6,7 +6,7 @@ import {
   geoAlbersUsa as d3_geoAlbersUsa,
   geoPath as d3_geoPath 
 } from "d3";
-import {feature, merge} from "topojson"
+import {feature} from "topojson"
 import axios from "axios"
 import svgPanZoom from "svg-pan-zoom";
 import cbpp_colorgen from "cbpp_colorgen";
@@ -17,6 +17,7 @@ import { loadTypekit } from "./load_typekit";
 import { create_legend } from "./legend";
 import { event_handlers } from "./event_handlers";
 import { merge_csv, binData, parse_csv } from "./data_utils";
+import { merge_states_from_districts } from "./merge_states_from_districts";
 
 /**
  * Initial setup tasks
@@ -189,8 +190,7 @@ function draw_states(svg, geojson) {
  */
 function draw_districts(args) {
   var {svg, geojson, bins} = args
-  var districts = svg.select(".svg-pan-zoom_viewport").selectAll("path.district")
-    .data(geojson.features);
+
   const { 
     mouseEnterHandler, 
     mouseLeaveHandler, 
@@ -200,14 +200,26 @@ function draw_districts(args) {
     onMouseDown,
     onMouseUp
   } = event_handlers({sel, popupMaker});
+
+  document.body.addEventListener("touchend", windowTouchEndHandler);
+  document.body.addEventListener("mousedown", onMouseDown)
+  document.body.addEventListener("mouseup", onMouseUp) 
+
+  var districts = svg.select(".svg-pan-zoom_viewport").selectAll("path.district")
+    .data(geojson.features);
+  
   districts
     .enter()
     .append("path")
+    .attr("class","district")
+    .attr("d", pathGenerator)
+    .on("touchend", touchEndHandler)
+    .on("mouseenter", mouseEnterHandler)
+    .on("mousemove", mouseMoveHandler)
+    .on("mouseleave", mouseLeaveHandler)
+    .merge(districts)
     .attr("stroke", DISTRICT_BORDER_COLOR)
     .attr("stroke-width", DISTRICT_BORDER_WIDTH)
-    .attr("class","district")
-    .merge(districts)
-    .attr("d", pathGenerator)
     .attr("fill", (d) => {
       if (d.properties.cd_avg_savings) {
         var this_color;
@@ -226,39 +238,7 @@ function draw_districts(args) {
         this.classList.add("has-data");
       }
     })
-    .on("touchend", touchEndHandler)
-    .on("mouseenter", mouseEnterHandler)
-    .on("mousemove", mouseMoveHandler)
-    .on("mouseleave", mouseLeaveHandler)
-  document.body.addEventListener("touchend", windowTouchEndHandler);
-  document.body.addEventListener("mousedown", onMouseDown)
-  document.body.addEventListener("mouseup", onMouseUp) 
+
   return { bins }
 }
 
-/**
- * Group districts by state and 
- * merge into state objects to draw
- * state borders
- */
-function merge_states_from_districts(topo) {
-  var state_objs = {};
-  var r = {
-    "type": "FeatureCollection",
-    "features": []
-  }
-  topo.objects.districts.geometries.forEach((district) => {
-    var state = district.properties.STATEFP;
-    if (typeof(state_objs[state]) === "undefined") {
-      state_objs[state] = [];
-    }
-    state_objs[state].push(district);
-  })
-  Object.keys(state_objs).forEach((state_fips) => {
-    var state_districts = state_objs[state_fips];
-    var state_geo = merge(topo, state_districts);
-    state_geo.properties = {"STATEFP": state_fips};
-    r.features.push(state_geo);
-  })
-  return r;
-}
