@@ -156,10 +156,12 @@ function create_svg(sel) {
     minZoom: 1,
     maxZoom: 50
   });
+  window.addEventListener("resize", () => {
+    zoomer.resize()
+    zoomer.center()
+  });
   return {svg, zoomer, popup_wrap};
 }
-
-
 
 /**
  * Draw states (purely decorative, no functionality attached)
