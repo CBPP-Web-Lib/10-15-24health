@@ -54,8 +54,8 @@ function binData(cds, prop, bins) {
 }
 
 function parse_csv(d) {
-  const header_row = 1;
-  const data_start = 2;
+  const header_row = 0;
+  const data_start = 1;
   d = d.split("\n");
   var r = {};
   d.forEach((row, i) => {

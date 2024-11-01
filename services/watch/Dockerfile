@@ -5,7 +5,7 @@ WORKDIR /opt/project
 RUN apt-get update 
 RUN apt-get install gdal-bin -y
 
-RUN npm install -g webpack@5
-RUN npm install -g webpack-cli@5
+RUN yarn global add webpack --verbose
+RUN yarn global add webpack-cli --verbose
 
-ENTRYPOINT npx webpack
+ENTRYPOINT webpack
