@@ -39,6 +39,7 @@ const STATE_BORDER_COLOR = "#000000"
 const DISTRICT_BORDER_COLOR = "#FFFFFF"
 const HOVER_COLOR = "#9ab0db"
 const PRIMARY_COL = "cd_perc_increase"
+const NO_DATA_COLOR = "#a0b0c0"
 
 /*This is a utility library that interpolates colors and returns a list*/
 const BIN_COLORS = cbpp_colorgen(LOW_COLOR, HIGH_COLOR, NUM_BINS, null, true);
@@ -94,7 +95,7 @@ Promise.all([
   create_controls(sel, zoomer);
 
   /*Calculate the ideal bins*/
-  var bins = binData(geojson.features, PRIMARY_COL, NUM_BINS);
+  var bins = binData(geojson.features, PRIMARY_COL, NUM_BINS, 0.05);
 
   /*Draw the map!*/
   draw_districts({svg, geojson, data, bins});
@@ -234,7 +235,7 @@ function draw_districts(args) {
         })
         return this_color;
       } else {
-        return "#ccc";
+        return NO_DATA_COLOR;
       }
     })
     .each(function(d) {

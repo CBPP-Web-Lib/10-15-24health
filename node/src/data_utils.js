@@ -36,7 +36,7 @@ function merge_csv(geojson, data, headers) {
  * assuming we want an equal number of districts
  * in each bin
  */
-function binData(cds, prop, bins) {
+function binData(cds, prop, bins, rounding) {
   var list = [];
   cds.forEach((feature) => {
     if (feature.properties[prop]) {
@@ -50,6 +50,16 @@ function binData(cds, prop, bins) {
     r.push(list[Math.floor(i/bins*l)])
   }
   r.push(list[l - 1])
+  r.forEach((n, i) => {
+    n = Math.round(n/rounding)*rounding
+    r[i] = n
+    if (r[i] === r[i-1]) {
+      r[i] += rounding
+    }
+  })
+  r.sort((a, b) => {
+    return a -b;
+  })
   return r;
 }
 
