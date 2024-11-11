@@ -39,7 +39,7 @@ const STATE_BORDER_COLOR = "#000000"
 const DISTRICT_BORDER_COLOR = "#FFFFFF"
 const HOVER_COLOR = "#9ab0db"
 const PRIMARY_COL = "cd_perc_increase"
-const NO_DATA_COLOR = "#a0b0c0"
+const NO_DATA_COLOR = "#888"
 
 /*This is a utility library that interpolates colors and returns a list*/
 const BIN_COLORS = cbpp_colorgen(LOW_COLOR, HIGH_COLOR, NUM_BINS, null, true);
