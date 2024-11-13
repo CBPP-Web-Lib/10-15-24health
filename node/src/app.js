@@ -26,8 +26,9 @@ const id = "health10-15-24"
 const sel = "#" + id
 const script_id = "script_" + id
 const script_sel = "#" + script_id
+
 /*Gets the correct base URL regardless of whether we're on the test apps.cbpp.org page or the real cbpp.org page*/
-const url_base = document.querySelector(script_sel).src.replace(/js\/app(\.min)*\.js/g,"")
+const url_base = document.querySelector(script_sel).src.replace(/js\/app(\.min)*\.js/g,"").split("?")[0];
 
 /*Colors, widths, etc.*/
 const DISTRICT_BORDER_WIDTH = 0.2
@@ -72,7 +73,7 @@ const popupMaker = Handlebars.compile(popupSnippet);
 Promise.all([
   new Promise((resolve) => {document.addEventListener("DOMContentLoaded", resolve)}),
   axios.get(url_base + "topojson/cd_topojson.json"),
-  axios.get(url_base + "data.csv"),
+  axios.get(url_base + "data.csv?r=111324_1"),
   loadTypekit()
 ]).then((d) => {
 
